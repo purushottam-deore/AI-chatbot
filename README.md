@@ -50,4 +50,4 @@ Required variables in `server/.env`:
 - **Total:** ~10 hours
 
 ## 🎥 Demo Video
-[Link to your Loom/Google Drive/YouTube video here]
+https://youtu.be/dDTinOz8Fn8
