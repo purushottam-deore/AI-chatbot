@@ -57,7 +57,7 @@ export default function App() {
         });
       }
 
-      // Save complete interaction to history
+      // Save complete  history
       const finalAiMsg = { role: 'ai', content: fullAiText, time: timeStamp };
       setHistory(prev => {
         const updated = [...prev, userMsg, finalAiMsg];
@@ -76,19 +76,19 @@ export default function App() {
     if (window.confirm("This will permanently delete ALL saved history. Continue?")) {
       setHistory([]);
       localStorage.removeItem('chat_history');
-      setCurrentChat([]); // Optional: clears the screen too
+      setCurrentChat([]); 
     }
   };
 
   const loadHistoryItem = (index) => {
-    // When clicking a user message, show it + the AI response that follows it
+    
     setCurrentChat([history[index], history[index + 1]]);
   };
 
   return (
     <div className="flex h-screen bg-gray-100 font-sans overflow-hidden">
 
-      {/* SIDEBAR */}
+      
       {/* SIDEBAR */}
       <div className="w-72 bg-slate-900 text-white flex flex-col hidden md:flex">
         <div className="p-4 border-b border-slate-700 font-bold text-indigo-400 flex justify-between items-center">
