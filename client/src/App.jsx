@@ -10,6 +10,7 @@ export default function App() {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef(null);
+  const [error, setError] = useState(null);
 
   // --- 2. HELPERS ---
   useEffect(() => {
@@ -23,6 +24,7 @@ export default function App() {
     e.preventDefault();
     if (!input.trim() || isTyping) return;
 
+    setError(null); // <-- 1. Reset error state at the start of every new message
     const timeStamp = getTime();
     const userMsg = { role: 'user', content: input, time: timeStamp };
 
@@ -39,6 +41,9 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: input }),
       });
+
+      // Check if the server response is actually okay (e.g., not a 500 error)
+      if (!res.ok) throw new Error("Server is having trouble processing this request.");
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -57,7 +62,6 @@ export default function App() {
         });
       }
 
-      // Save complete  history
       const finalAiMsg = { role: 'ai', content: fullAiText, time: timeStamp };
       setHistory(prev => {
         const updated = [...prev, userMsg, finalAiMsg];
@@ -67,6 +71,8 @@ export default function App() {
 
     } catch (err) {
       console.error("Stream error:", err);
+      // <-- 2. Set the error message here so the UI can see it
+      setError("Connection Error: Make sure your local server is running on port 5000.");
     } finally {
       setIsTyping(false);
     }
@@ -76,19 +82,19 @@ export default function App() {
     if (window.confirm("This will permanently delete ALL saved history. Continue?")) {
       setHistory([]);
       localStorage.removeItem('chat_history');
-      setCurrentChat([]); 
+      setCurrentChat([]);
     }
   };
 
   const loadHistoryItem = (index) => {
-    
+
     setCurrentChat([history[index], history[index + 1]]);
   };
 
   return (
     <div className="flex h-screen bg-gray-100 font-sans overflow-hidden">
 
-      
+
       {/* SIDEBAR */}
       <div className="w-72 bg-slate-900 text-white flex flex-col hidden md:flex">
         <div className="p-4 border-b border-slate-700 font-bold text-indigo-400 flex justify-between items-center">
@@ -124,13 +130,42 @@ export default function App() {
       </div>
 
       {/* MAIN CHAT */}
+      
+      {error && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-50 animate-bounce-short">
+          <div className="bg-red-600 text-white px-4 py-2 rounded-full shadow-2xl flex items-center gap-2 border-2 border-white/20">
+            
+            <span className="text-sm">⚠️</span>
+
+            
+            <span className="text-[11px] font-bold tracking-wide uppercase whitespace-nowrap">
+              {error}
+            </span>
+
+            
+            <button
+              onClick={() => setError(null)}
+              className="ml-1 hover:bg-black/20 rounded-full p-1 transition-colors"
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
+
       <div className="flex-1 flex flex-col">
         <header className="bg-white border-b p-4 flex justify-between items-center shadow-sm">
           <h1 className="font-bold text-slate-700 text-xl">Gemini Chat</h1>
           <button onClick={() => setCurrentChat([])} className="text-xs font-bold text-indigo-600 bg-indigo-50 px-4 py-2 rounded-full hover:bg-indigo-100 transition">
             NEW CHAT
           </button>
+          
         </header>
+
+        
 
         <main ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-6">
           {currentChat.map((m, i) => (
