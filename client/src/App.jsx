@@ -36,7 +36,7 @@ export default function App() {
     setCurrentChat(prev => [...prev, aiMsg]);
 
     try {
-      const res = await fetch('http://localhost:5000/chat', {
+      const res = await fetch('https://ai-chatbot-server-v5tp.onrender.com/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: input }),
